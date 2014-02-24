@@ -7,9 +7,9 @@
             <asp:Literal ID="SuccessLiteral" runat="server" />
         </div>
     </asp:Panel>
-    <asp:ValidationSummary ID="ValidationSummary" runat="server" CssClass="validation-summary-errors alert alert-danger" />
-    <asp:ValidationSummary ID="InsertSummary" runat="server" ValidationGroup="insert" CssClass="validation-summary-errors alert alert-danger" />
-    <asp:ListView ID="ContactListView" runat="server" ItemType="aventyrliga_kontakter.Model.Contact"
+    <asp:ValidationSummary ID="ValidationSummary" runat="server" ShowModelStateErrors="true" CssClass="validation-summary-errors alert alert-danger" />
+    <asp:ValidationSummary ID="InsertSummary" ShowModelStateErrors="false" runat="server" ValidationGroup="insert" CssClass="validation-summary-errors alert alert-danger" />
+    <asp:ListView EnableModelValidation="true" ID="ContactListView" runat="server" ItemType="aventyrliga_kontakter.Model.Contact"
         SelectMethod="ContactListView_GetData"
         InsertMethod="ContactListView_InsertItem"
         UpdateMethod="ContactListView_UpdateItem"
@@ -84,7 +84,8 @@
     </asp:ListView>
     <asp:DataPager ID="ContactPager" runat="server" PagedControlID="ContactListview" PageSize="20">
         <Fields>
-            <asp:NumericPagerField ButtonCount="10" NextPageText="--->" PreviousPageText="<---" />
+            <%--<asp:NumericPagerField ButtonCount="10" NextPageText="--->" PreviousPageText="<---" />--%>
+            <asp:NextPreviousPagerField FirstPageText="<<--Första" PreviousPageText="<-Föregående" NextPageText="Nästa->" LastPageText="Sista-->>" ShowFirstPageButton="true" ShowLastPageButton="true" RenderDisabledButtonsAsLabels="True" />
         </Fields>
     </asp:DataPager>
 </asp:Content>

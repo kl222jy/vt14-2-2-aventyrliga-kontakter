@@ -60,7 +60,7 @@ namespace aventyrliga_kontakter.Model.DAL
                             var contactIdIndex = reader.GetOrdinal("ContactID");
                             var firstNameIndex = reader.GetOrdinal("FirstName");
                             var lastNameIndex = reader.GetOrdinal("LastName");
-                            var emailAdressIndex = reader.GetOrdinal("EmailAdress");
+                            var emailAdressIndex = reader.GetOrdinal("EmailAddress");
 
                             return new Contact
                             {
@@ -118,8 +118,14 @@ namespace aventyrliga_kontakter.Model.DAL
                     }
 
                     contacts.TrimExcess();
-
-                    return contacts;
+                    if (contacts.Count > 1)
+                    {
+                        return contacts;                        
+                    }
+                    else
+                    {
+                        throw new ApplicationException("An error occured while getting contacts from the database.");
+                    }
                 }
                 catch
                 {
@@ -145,7 +151,7 @@ namespace aventyrliga_kontakter.Model.DAL
                     SqlCommand cmd = new SqlCommand("Person.uspGetContactsPageWise", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("@PageIndex", SqlDbType.Int, 4).Value = startRowIndex;
+                    cmd.Parameters.Add("@PageIndex", SqlDbType.Int, 4).Value = (startRowIndex / maximumRows) + 1;
                     cmd.Parameters.Add("@PageSize", SqlDbType.Int, 4).Value = maximumRows;
                     cmd.Parameters.Add("@RecordCount", SqlDbType.Int, 4).Direction = ParameterDirection.Output;
 
@@ -171,7 +177,14 @@ namespace aventyrliga_kontakter.Model.DAL
                     }
                     contacts.TrimExcess();
                     totalRowCount = (int)cmd.Parameters["@RecordCount"].Value;
-                    return contacts;
+                    if (contacts.Count > 1)
+                    {
+                        return contacts;
+                    }
+                    else
+                    {
+                        throw new ApplicationException("An error occured while getting contacts from the database.");
+                    }
                 }
 
                 catch (Exception)
@@ -194,9 +207,9 @@ namespace aventyrliga_kontakter.Model.DAL
                     SqlCommand cmd = new SqlCommand("Person.uspAddContact", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add("@FirstName", SqlDbType.NVarChar, 2).Value = contact.FirstName;
-                    cmd.Parameters.Add("@LastName", SqlDbType.NVarChar, 2).Value = contact.LastName;
-                    cmd.Parameters.Add("@EmailAddress", SqlDbType.NVarChar, 2).Value = contact.EmailAdress;
+                    cmd.Parameters.Add("@FirstName", SqlDbType.NVarChar, 50).Value = contact.FirstName;
+                    cmd.Parameters.Add("@LastName", SqlDbType.NVarChar, 50).Value = contact.LastName;
+                    cmd.Parameters.Add("@EmailAddress", SqlDbType.NVarChar, 50).Value = contact.EmailAdress;
 
                     cmd.Parameters.Add("@ContactID", SqlDbType.Int, 4).Direction = ParameterDirection.Output;
 
@@ -229,7 +242,7 @@ namespace aventyrliga_kontakter.Model.DAL
                     cmd.Parameters.Add("@ContactID", SqlDbType.Int, 4).Value = contact.ContactId;
                     cmd.Parameters.Add("@FirstName", SqlDbType.NVarChar, 100).Value = contact.FirstName;
                     cmd.Parameters.Add("@LastName", SqlDbType.NVarChar, 100).Value = contact.LastName;
-                    cmd.Parameters.Add("@EmailAdress", SqlDbType.NVarChar, 100).Value = contact.EmailAdress;
+                    cmd.Parameters.Add("@EmailAddress", SqlDbType.NVarChar, 100).Value = contact.EmailAdress;
 
                     conn.Open();
 

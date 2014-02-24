@@ -35,7 +35,11 @@ namespace aventyrliga_kontakter
         }
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (Request.QueryString["attempt"] == "success")
+            {
+                SuccessLiteral.Text = Request.QueryString["message"];
+                SuccessPanel.Visible = true;
+            }
         }
 
         /// <summary>
@@ -47,7 +51,7 @@ namespace aventyrliga_kontakter
         /// <returns>kontaktlista</returns>
         public IEnumerable<Contact> ContactListView_GetData(int maximumRows, int startRowIndex, out int totalRowCount)
         {
-            startRowIndex += 1;
+            //startRowIndex += 1;
             try
             {
                 return Service.GetContactsPageWise(maximumRows, startRowIndex, out totalRowCount);
@@ -55,7 +59,7 @@ namespace aventyrliga_kontakter
             catch
             {
                 ModelState.AddModelError(string.Empty, "Ett oväntat fel inträffade då data skulle hämtas.");
-                totalRowCount = 100;
+                totalRowCount = 0;
                 return null;
             }
         }
@@ -66,15 +70,20 @@ namespace aventyrliga_kontakter
         /// <param name="contact">Kontakt</param>
         public void ContactListView_InsertItem(Contact contact)
         {
-            try
+            if (ModelState.IsValid)
             {
-                Service.SaveContact(contact);
-                SuccessLiteral.Text = "Kontakten lades till.";
-                SuccessPanel.Visible = true;
-            }
-            catch (Exception)
-            {
-                ModelState.AddModelError(string.Empty, "Ett oväntat fel inträffade då kontakten skulle läggas till.");
+                try
+                {
+                    if (TryUpdateModel(contact))
+                    {
+                        Service.SaveContact(contact);
+                        Response.Redirect(string.Concat(Request.RawUrl, "?attempt=success&message=Kontakten%20lades%20till."));
+                    }
+                }
+                catch (Exception)
+                {
+                    ModelState.AddModelError(string.Empty, "Ett oväntat fel inträffade då kontakten skulle läggas till.");
+                }
             }
         }
 
@@ -92,12 +101,14 @@ namespace aventyrliga_kontakter
                     ModelState.AddModelError(string.Empty, "Kontakten hittades inte.");
                     return;
                 }
-                if (TryUpdateModel(contact))
+                if (ModelState.IsValid)
                 {
-                    Service.SaveContact(contact);
+                    if (TryUpdateModel(contact))
+                    {
+                        Service.SaveContact(contact);
+                        Response.Redirect(string.Concat(Request.RawUrl, "?attempt=success&message=Kontakten%20uppdaterades."));
+                    } 
                 }
-                SuccessLiteral.Text = "Uppdateringen lyckades.";
-                SuccessPanel.Visible = true;
             }
             catch (Exception)
             {
@@ -114,8 +125,7 @@ namespace aventyrliga_kontakter
             try
             {
                 Service.DeleteContact(ContactId);
-                SuccessLiteral.Text = "Kontakten togs bort.";
-                SuccessPanel.Visible = true;
+                Response.Redirect(string.Concat(Request.RawUrl, "?attempt=success&message=Kontakten%20togs%20bort."));
             }
             catch (Exception ex)
             {

@@ -1,6 +1,7 @@
 ﻿using aventyrliga_kontakter.Model.DAL;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -86,6 +87,15 @@ namespace aventyrliga_kontakter.Model
         /// <param name="contact">kontakt (objekt)</param>
         public void SaveContact(Contact contact)
         {
+            ICollection<ValidationResult> validationResults;
+
+            if(!contact.Validate(out validationResults))
+            {
+                var ex = new ValidationException("");
+                ex.Data.Add("ValidationResults", validationResults);
+                throw ex;
+            }
+
             if (contact.ContactId == 0)
             {
                 ContactDAL.InsertContact(contact);
